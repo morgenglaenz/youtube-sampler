@@ -1,0 +1,19 @@
+{
+  "name": "youtube-sampler",
+  "version": "1.0.0",
+  "description": "grabs snippets of video from youtube",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/morgenglaenz/youtube-sampler"
+  },
+  "author": "morgenglaenz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/morgenglaenz/youtube-sampler/issues"
+  },
+  "homepage": "https://github.com/morgenglaenz/youtube-sampler"
+}
