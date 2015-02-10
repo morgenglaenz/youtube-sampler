@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/morgenglaenz/youtube-sampler/issues"
   },
-  "homepage": "https://github.com/morgenglaenz/youtube-sampler"
+  "homepage": "https://github.com/morgenglaenz/youtube-sampler",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.0.0-rc3",
+    "ytdl-core": "^0.4.1"
+  }
 }
