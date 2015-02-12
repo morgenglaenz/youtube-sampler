@@ -7,31 +7,60 @@ var spawn = require('child_process').spawn;
 var videos, inputs;
 var output = process.argv[2];
 var outfile;
+var promises = [];
+var MAX_THREADS = 4;
 
 fs.readdir('./video/', function (err, list) {
   videos = list;
-  muxing(list);
+  var filesPromise = Q.defer();
+  promises.push(filesPromise.promise);
+  muxing(list, filesPromise);
 });
 
-var promises = [];
 
-var muxing = function (list) {
-  console.log('Getting duration of videos, stripping to 2 sec')
+var muxing = function (list, filesPromise) {
+  console.log('Getting duration of videos')
   list.forEach(function (video, i) {
     ffmpeg.ffprobe('./video/' + video, function (err, metadata) {
-        var duration = metadata.format.duration;
-        var outfile;
-        var promise = Q.defer();
-        promises.push((promise)
-        outfile = ffmpeg('./video/' + video).seek(duration / 2).setDuration(2.0)
-          .output('./tmp/' + i + '.mp4')
-          .on('end', function () {
-            promise.resolve();
-          })
-          .run()
-      });
+      theMachine(metadata, video, i, (i === list.length - 1), filesPromise);
+    });
   });
 };
+
+var seekAndStrip = function (duration, video, promise, index) {
+ ffmpeg('./video/' + video).seek(duration / 2).setDuration(2.0)
+    .output('./tmp/' + index + '.mp4')
+    .on('end', function () {
+      console.log('################ Im resolvingyieha')
+      promise.resolve();
+    })
+  .run()
+};
+
+var theMachine = function (metadata, video, index, last, filesPromise) {
+  var threadsQueue = [];
+  var threadsPromise;
+  var duration = metadata.format.duration;
+  var outfile;
+  var promise = Q.defer();
+  promises.push(promise.promise);
+  if (threadsQueue.length < 4) {
+    threadsQueue.push(promise.promise);
+    seekAndStrip(duration, video, promise, index);
+    if (!threadsPromise) {
+    threadsPromise = Q.all(threadsQueue)
+      .then(function () {
+        threadsPromise = undefined;
+        threadsQueue = [];
+      });
+    }
+  }
+    if (last) {
+      Q.all(promises)
+        .then(merger);
+      filesPromise.resolve();
+    }
+}
 
 var merger = function () {
   console.log('Concatenating videos, this takes a while');
@@ -41,7 +70,7 @@ var merger = function () {
       concatString += 'file tmp/' + tmp + "\n";  
     });
     fs.writeFileSync('input.txt', concatString);
-    concat = spawn('ffmpeg', ['-f', 'concat', '-i', 'input.txt', 'out.mp4']);
+    concat = spawn('ffmpeg', ['-y', '-f', 'concat', '-i', 'input.txt', 'out.mp4']);
     concat.stderr.on('data', function (data) {
       console.log('error' + data)
     });
@@ -49,10 +78,7 @@ var merger = function () {
       console.log(code);
     });
   });     
-  // ffmpeg -f concat -i .txt
  
 };
 
-Q.all(promises)
-  .then(merger);
 

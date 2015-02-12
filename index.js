@@ -14,6 +14,7 @@ var opts = {
 
 var searchAndConquer = search(keyWord, opts, function (err, results) {
   if (err) return console.error(err);
+  console.log('I have this much stuff', results.length)
   results.forEach(function (result, i) {
     var video;
     if (creds.user && creds.pass &&
@@ -30,4 +31,4 @@ var searchAndConquer = search(keyWord, opts, function (err, results) {
   });
 });
 
-
+// http://gdata.youtube.com/feeds/api/videos?orderby=relevance&safeSearch=none&v=2&q=
