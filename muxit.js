@@ -8,6 +8,7 @@ var videos, inputs;
 var output = process.argv[2];
 var outfile;
 var promises = [];
+var threadsQueue = [];
 var MAX_THREADS = 4;
 
 fs.readdir('./video/', function (err, list) {
@@ -37,20 +38,32 @@ var seekAndStrip = function (duration, video, promise, index) {
   .run()
 };
 
+Make promises -> add to queue.
+If queue done, make more promises,
+   until finally queue is empty.
+
+
+
+
+
+
+
 var theMachine = function (metadata, video, index, last, filesPromise) {
-  var threadsQueue = [];
+  var emptyQueue = true;
   var threadsPromise;
   var duration = metadata.format.duration;
   var outfile;
   var promise = Q.defer();
   promises.push(promise.promise);
+
   if (threadsQueue.length < 4) {
     threadsQueue.push(promise.promise);
+    emptyQueue = false;
     seekAndStrip(duration, video, promise, index);
-    if (!threadsPromise) {
+    if (emptyQueue) {
     threadsPromise = Q.all(threadsQueue)
       .then(function () {
-        threadsPromise = undefined;
+        emptyQueue = true;
         threadsQueue = [];
       });
     }
@@ -61,6 +74,8 @@ var theMachine = function (metadata, video, index, last, filesPromise) {
       filesPromise.resolve();
     }
 }
+
+
 
 var merger = function () {
   console.log('Concatenating videos, this takes a while');
