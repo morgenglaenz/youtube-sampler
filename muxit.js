@@ -38,14 +38,21 @@ var seekAndStrip = function (duration, video, promise, index) {
   .run()
 };
 
-Make promises -> add to queue.
-If queue done, make more promises,
-   until finally queue is empty.
+//Make promises -> add to queue.
+//If queue done, make more promises,
+   //until finally queue is empty.
 
-
-
-
-
+var worker = function () {
+  var localPromises = [];
+  var things = threadsQueue.splice(0, MAX_THREADS);
+  things.forEach(function (thing, index) {
+    localPromises.push(thing.promise.promise);
+    seekAndStrip(thing.duration, thing.video, thing.promise, thing.index);
+    if (things.length > 0 && index === things.length -1) {
+      Q.all(localPromises).then(worker);
+    }
+  });
+};
 
 
 var theMachine = function (metadata, video, index, last, filesPromise) {
@@ -55,23 +62,18 @@ var theMachine = function (metadata, video, index, last, filesPromise) {
   var outfile;
   var promise = Q.defer();
   promises.push(promise.promise);
+  threadsQueue.push({
+    duration: duration,
+    video: video,
+    promise: promise,
+    index: index
+  });
 
-  if (threadsQueue.length < 4) {
-    threadsQueue.push(promise.promise);
-    emptyQueue = false;
-    seekAndStrip(duration, video, promise, index);
-    if (emptyQueue) {
-    threadsPromise = Q.all(threadsQueue)
-      .then(function () {
-        emptyQueue = true;
-        threadsQueue = [];
-      });
-    }
-  }
-    if (last) {
+   if (last) {
       Q.all(promises)
-        .then(merger);
+        .finally(merger);
       filesPromise.resolve();
+      worker();
     }
 }
 
