@@ -23,6 +23,7 @@ var muxing = function (list, filesPromise) {
   console.log('Getting duration of videos')
   list.forEach(function (video, i) {
     ffmpeg.ffprobe('./video/' + video, function (err, metadata) {
+      if (err) {throw new Error(err)}
       theMachine(metadata, video, i, (i === list.length - 1), filesPromise);
     });
   });
@@ -30,6 +31,10 @@ var muxing = function (list, filesPromise) {
 
 var seekAndStrip = function (duration, video, promise, index) {
  ffmpeg('./video/' + video).seek(duration / 2).setDuration(2.0)
+    .videoCodec('libx264')
+    .videoBitrate('1000k')
+    .size('854x480')
+    .autopad()
     .output('./tmp/' + index + '.mp4')
     .on('end', function () {
       console.log('################ Im resolvingyieha')
