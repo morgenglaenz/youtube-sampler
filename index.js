@@ -1,34 +1,25 @@
-var search = require('youtube-search');
-var youtdl = require('youtube-dl');
-var ytdl = require('ytdl-core');
-var fs = require('fs');
-var creds = require('./creds.json');
+var settings = require('./settings');
+var clean = require('./clean');
 
-var keyWord = process.argv[2];
-var anon = process.argv[3];
+var spawn = require('child_process').spawn;
+var music = require('./music');
 
-var opts = {
-  maxResults: 10,
-  startIndex: 1
-};
-
-var searchAndConquer = search(keyWord, opts, function (err, results) {
-  if (err) return console.error(err);
-  console.log('I have this much stuff', results.length)
-  results.forEach(function (result, i) {
-    var video;
-    if (creds.user && creds.pass &&
-        anon !== 'true') {
-      console.log('auth is on for user: ' + creds.user);
-      video = youtdl(result.url, ['-u ' + creds.user, '-p ' + creds.pass])
-    } else {
-      console.log('im downloadings stuff without auth');
-      video = ytdl(result.url);
-    }
-    video
-      .pipe(fs.createWriteStream('./video/tmp-' + keyWord + '_' + + i + '.mp4'));
-      
+clean();
+var searchProcess = spawn('node', [settings.dir + 'search']);
+searchProcess.on('close', function () {
+  var muxit = spawn('node', [settings.dir + 'muxit'])
+  muxit.stdout.on('data', function (data) {
+    console.log('' + data);
+  }) ;
+  muxit.on('close', function () {
+    music();
   });
 });
+searchProcess.stdout.on('data', function (data) {
+  console.log('' + data)
+});
+
+//var keyWord = process.argv[2];
+//var searchAndConquer = search(keyWord, opts, processYTSearch);
 
 // http://gdata.youtube.com/feeds/api/videos?orderby=relevance&safeSearch=none&v=2&q=

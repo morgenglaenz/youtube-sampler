@@ -18,8 +18,10 @@
   "homepage": "https://github.com/morgenglaenz/youtube-sampler",
   "dependencies": {
     "fluent-ffmpeg": "^2.0.0-rc3",
-    "youtube-dl": "^1.8.0",
-    "youtube-search": "^0.2.0",
-    "ytdl-core": "^0.4.1"
+    "q": "^1.4.1",
+    "youtube-api": "^0.3.2",
+    "youtube-dl": "",
+    "youtube-search": "git@github.com:fritzvd/youtube-search.git",
+    "ytdl-core": ""
   }
 }
