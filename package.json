@@ -19,6 +19,7 @@
   "dependencies": {
     "fluent-ffmpeg": "^2.0.0-rc3",
     "q": "^1.4.1",
+    "twitter": "^1.2.5",
     "youtube-api": "^0.3.2",
     "youtube-dl": "",
     "youtube-search": "git@github.com:fritzvd/youtube-search.git",
