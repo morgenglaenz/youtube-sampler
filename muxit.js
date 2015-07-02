@@ -24,7 +24,9 @@ fs.readdir(settings.dir + 'raw/', function (err, list) {
 var muxing = function (list, filesPromise) {
   console.log('Getting duration of videos')
   list.forEach(function (video, i) {
-    if (video.split('.')[1] !== 'mp4') {return}
+    if (video.split('.')[1] !== 'mp4') {
+      list.splice(list.indexOf(video), 1)
+      return}
     ffmpeg.ffprobe(settings.dir + 'raw/' + video, function (err, metadata) {
       if (err) {throw new Error(err)}
       theMachine(metadata, video, i, (i === list.length - 1), filesPromise);
@@ -58,6 +60,9 @@ var seekAndStrip = function (duration, video, promise, index) {
     .outputOptions('-f mpegts')
     .outputOptions('-bsf:v h264_mp4toannexb')
     .output(settings.dir + 'tmp/' + index + '.ts')
+    .on('error', function(err, stdout, stderr) {
+      console.log('Cannot process video: ' + err.message);
+    })
     .on('end', function () {
       console.log('################ Im resolvingyieha')
       promise.resolve();

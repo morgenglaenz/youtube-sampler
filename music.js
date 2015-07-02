@@ -15,11 +15,11 @@ function duration (err, metadata) {
 
 
 function downloadSong () {
-  search('', {key: creds.oauth, maxResults:1, startIndex:Math.floor(Math.random() * 10) }, function (err, results) {
+  search('', {key: creds.oauth, maxResults: Math.floor(Math.random() * 10), startIndex:Math.floor(Math.random() * 10) }, function (err, results) {
     if (err) return console.error(err);
     if (results.length == 0) { return; }
 
-    var link = results[0].link;
+    var link = results[Math.floor(Math.random() * results.length - 1)].link;
     var video = ytdl(link);
       video.pipe(fs.createWriteStream(settings.dir + 'raw/song.mp3'))
       video.on('end', function () {      

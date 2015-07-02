@@ -33,3 +33,5 @@ secrets.json
 raw/
 tmp/
 archive/
+input.txt
+settings.js
